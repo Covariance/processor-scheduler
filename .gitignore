@@ -1,0 +1,5 @@
+# idea standart folders
+
+**/.idea
+*.iml
+**/target
