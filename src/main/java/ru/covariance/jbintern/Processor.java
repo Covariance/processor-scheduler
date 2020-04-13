@@ -1,7 +1,5 @@
 package ru.covariance.jbintern;
 
-import ru.covariance.jbintern.exceptions.ProcessorException;
-
 import java.util.List;
 
 public interface Processor<T> {
@@ -25,6 +23,4 @@ public interface Processor<T> {
      * @throws ProcessorException if error occurs during processing
      */
     T process(List<T> input) throws ProcessorException;
-
-
 }

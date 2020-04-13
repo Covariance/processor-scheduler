@@ -1,7 +1,5 @@
 package ru.covariance.jbintern;
 
-import ru.covariance.jbintern.exceptions.ProcessorException;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,8 +14,5 @@ public interface Runner<T> {
      * @return a map, where the key is a processor id, and the value is a list of its outputs in the order of iterations
      * @throws ProcessorException if a processor throws an exception, loops detected, or some input ids not found
      */
-
     Map<String, List<T>> runProcessors(Set<Processor<T>> processors, int maxThreads, int maxIterations) throws ProcessorException;
-
-
 }
