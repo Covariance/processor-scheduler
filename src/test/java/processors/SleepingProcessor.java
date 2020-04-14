@@ -1,6 +1,7 @@
+package processors;
+
 import ru.covariance.jbintern.Processor;
 import ru.covariance.jbintern.ProcessorException;
-import ru.covariance.jbintern.structure.UnfedProcessor;
 
 import java.util.List;
 

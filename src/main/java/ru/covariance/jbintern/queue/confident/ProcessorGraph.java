@@ -1,4 +1,4 @@
-package ru.covariance.jbintern.preprocessing;
+package ru.covariance.jbintern.queue.confident;
 
 import ru.covariance.jbintern.Processor;
 import ru.covariance.jbintern.ProcessorException;

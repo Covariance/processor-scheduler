@@ -8,10 +8,10 @@ import java.util.stream.IntStream;
  * @author <a href="https://www.geeksforgeeks.org/random-tree-generator-using-prufer-sequence-with-examples/">Geeks for geeks</a>
  */
 
-public class GFG {
+public class TreeGenerator {
     // Prints edges of tree
     // represented by give Prufer code
-    static Graph printTreeEdges(int[] prufer, int m) {
+    private static Graph printTreeEdges(int[] prufer, int m) {
         int vertices = m + 2;
         int[] vertex_set = new int[vertices];
 
@@ -64,7 +64,7 @@ public class GFG {
     }
 
     // Function to Generate Random Tree
-    static Graph generateRandomTree(Random rand, int n) {
+    public static Graph generateRandomTree(Random rand, int n) {
         int length = n - 2;
         int[] arr = new int[length];
 

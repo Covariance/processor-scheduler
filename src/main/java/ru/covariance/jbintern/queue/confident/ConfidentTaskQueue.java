@@ -1,9 +1,8 @@
-package ru.covariance.jbintern.queue;
+package ru.covariance.jbintern.queue.confident;
 
 import ru.covariance.jbintern.ProcessorException;
+import ru.covariance.jbintern.queue.TaskQueue;
 import ru.covariance.jbintern.structure.FedProcessor;
-import ru.covariance.jbintern.preprocessing.ProcessorGraph;
-import ru.covariance.jbintern.preprocessing.ProcessorTask;
 
 import java.util.*;
 import java.util.concurrent.locks.Condition;
