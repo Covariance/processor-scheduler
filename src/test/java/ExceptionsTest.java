@@ -36,6 +36,18 @@ public class ExceptionsTest {
     }
 
     @Test(expected = ProcessorException.class)
+    public void dfsTrapTest() throws ProcessorException {
+        creator.create().runProcessors(
+                Set.of(
+                        new SleepingProcessor<>("one", List.of("two"), -1, 10),
+                        new SleepingProcessor<>("two", List.of("one"), -1, 10)
+                ),
+                10,
+                10
+        );
+    }
+
+    @Test(expected = ProcessorException.class)
     public void loopCyclicTest() throws ProcessorException {
         creator.create().runProcessors(
                 Set.of(

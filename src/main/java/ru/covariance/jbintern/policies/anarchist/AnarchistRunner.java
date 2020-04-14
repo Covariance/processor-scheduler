@@ -2,6 +2,7 @@ package ru.covariance.jbintern.policies.anarchist;
 
 import ru.covariance.jbintern.Processor;
 import ru.covariance.jbintern.Runner;
+import ru.covariance.jbintern.queue.TaskQueueCreator;
 import ru.covariance.jbintern.queue.confident.ProcessorGraph;
 import ru.covariance.jbintern.queue.confident.ConfidentTaskQueue;
 import ru.covariance.jbintern.queue.TaskQueue;
@@ -16,12 +17,17 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AnarchistRunner<T> implements Runner<T> {
+    private final TaskQueueCreator<T> tqc;
+
+    public AnarchistRunner(TaskQueueCreator<T> tqc) {
+        this.tqc = tqc;
+    }
+
     @Override
     public Map<String, List<T>> runProcessors(Set<Processor<T>> processors, int maxThreads, int maxIterations) throws ProcessorException {
-        ProcessorGraph<T> graph = new ProcessorGraph<>(processors, maxIterations);
-        TaskQueue<T> tq = new ConfidentTaskQueue<>(graph, maxIterations);
+        TaskQueue<T> tq = tqc.create(processors, maxIterations, maxThreads);
         if (maxThreads > processors.size() + 1) {
-            maxThreads = processors.size() - 1;
+            maxThreads = processors.size();
         }
         Lock lock = tq.getLock();
         Condition condition = tq.getCondition();

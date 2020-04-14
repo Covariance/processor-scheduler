@@ -69,7 +69,7 @@ public class ProcessorGraph<T> {
             for (String input : inputs) {
                 ProcessorNode<T> b = lookup.get(input);
                 if (b == null) {
-                    throw new ProcessorException("Processor dependency graph has unknown inputs.");
+                    throw new ProcessorException("Processor dependency graph has unknown inputs: " + input);
                 }
                 a.inputs.add(b);
                 b.outputs.add(a);
@@ -81,16 +81,11 @@ public class ProcessorGraph<T> {
     }
 
     // region acyclic
-    private boolean dfs(String v, String p, Map<String, Integer> color) {
+    private boolean dfs(String v, Map<String, Integer> color) {
         color.put(v, 1);
         for (ProcessorNode<T> son : lookup.get(v).outputs) {
-            if (!son.ID.equals(p) && color.get(son.ID) != 2) {
-                if (color.get(son.ID) == 1) {
-                    return true;
-                }
-                if (dfs(son.ID, v, color)) {
-                    return true;
-                }
+            if (color.get(son.ID) != 2 && (color.get(son.ID) == 1 || dfs(son.ID, color))) {
+                return true;
             }
         }
         color.put(v, 2);
@@ -104,7 +99,7 @@ public class ProcessorGraph<T> {
         }
         for (String ID : color.keySet()) {
             if (color.get(ID) == 0) {
-                if (dfs(ID, "", color)) {
+                if (dfs(ID, color)) {
                     return false;
                 }
             }
@@ -131,10 +126,6 @@ public class ProcessorGraph<T> {
 
     public int size() {
         return lookup.size();
-    }
-
-    public ProcessorNode<T> getNode(String node) {
-        return lookup.get(node);
     }
 
     public FedProcessor<T> feed(String node) {

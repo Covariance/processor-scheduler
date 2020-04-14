@@ -1,5 +1,6 @@
 package ru.covariance.jbintern.queue.confident;
 
+import ru.covariance.jbintern.Processor;
 import ru.covariance.jbintern.ProcessorException;
 import ru.covariance.jbintern.queue.TaskQueue;
 import ru.covariance.jbintern.structure.FedProcessor;
@@ -20,10 +21,15 @@ public class ConfidentTaskQueue<T> implements TaskQueue<T> {
     private final ProcessorGraph<T> graph;
     private int lastEpoch;
 
+    public static <T> ConfidentTaskQueue<T> create(Set<Processor<T>> processors,
+                                                   int maxIterations,
+                                                   int maxThreads) throws ProcessorException {
+        return new ConfidentTaskQueue<>(processors, maxIterations, maxThreads);
+    }
 
-    public ConfidentTaskQueue(ProcessorGraph<T> graph, int lastEpoch) {
-        this.graph = graph;
-        this.lastEpoch = lastEpoch;
+    public ConfidentTaskQueue(Set<Processor<T>> processors, int maxIterations, int maxThreads) throws ProcessorException {
+        this.graph = new ProcessorGraph<T>(processors, maxIterations);
+        this.lastEpoch = maxIterations;
         this.epochCompletion = new int[lastEpoch];
         queue.addAll(graph.initialTasks());
     }
@@ -89,6 +95,7 @@ public class ConfidentTaskQueue<T> implements TaskQueue<T> {
     @Override
     public void error(ProcessorException e) {
         exception = e;
+        condition.signalAll();
     }
 
     @Override
