@@ -2,7 +2,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import processors.CuttingProcessor;
-import processors.HeavyCalcProcessor;
+import processors.SleepingProcessor;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class CuttingTest {
         new TestCase<>(
                 Set.of(
                         new CuttingProcessor("one", List.of("two"), 5),
-                        new HeavyCalcProcessor("two", List.of(), 1)
+                        new SleepingProcessor<>("two", List.of(), 0, 1)
                 ),
                 Map.of(
                         "one", List.of(0, 0, 0, 0),

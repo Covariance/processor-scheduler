@@ -2,7 +2,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import processors.ExceptionalProcessor;
-import processors.HeavyCalcProcessor;
 import processors.SleepingProcessor;
 import ru.covariance.jbintern.ProcessorException;
 
@@ -93,7 +92,7 @@ public class ExceptionsTest {
         creator.create().runProcessors(
                 Set.of(
                         new ExceptionalProcessor("one", List.of("two"), 10),
-                        new HeavyCalcProcessor("two", List.of("three"), 100),
+                        new SleepingProcessor<>("two", List.of("three"), 0, 1),
                         new SleepingProcessor<>("three", List.of(), 0, 1)
                 ),
                 10,
