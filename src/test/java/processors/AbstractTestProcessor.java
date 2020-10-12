@@ -1,6 +1,6 @@
 package processors;
 
-import ru.covariance.jbintern.Processor;
+import ru.covariance.processorScheduler.Processor;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package ru.covariance.jbintern.queue;
+package ru.covariance.processorScheduler.queue;
 
-import ru.covariance.jbintern.ProcessorException;
-import ru.covariance.jbintern.structure.FedProcessor;
+import ru.covariance.processorScheduler.ProcessorException;
+import ru.covariance.processorScheduler.structure.FedProcessor;
 
 import java.util.List;
 import java.util.Map;

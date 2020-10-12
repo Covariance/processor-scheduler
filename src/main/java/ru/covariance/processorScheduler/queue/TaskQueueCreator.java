@@ -1,7 +1,7 @@
-package ru.covariance.jbintern.queue;
+package ru.covariance.processorScheduler.queue;
 
-import ru.covariance.jbintern.Processor;
-import ru.covariance.jbintern.ProcessorException;
+import ru.covariance.processorScheduler.Processor;
+import ru.covariance.processorScheduler.ProcessorException;
 
 import java.util.Set;
 

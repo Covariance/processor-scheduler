@@ -1,9 +1,9 @@
-package ru.covariance.jbintern.queue.confident;
+package ru.covariance.processorScheduler.queue.confident;
 
-import ru.covariance.jbintern.Processor;
-import ru.covariance.jbintern.ProcessorException;
-import ru.covariance.jbintern.queue.TaskQueue;
-import ru.covariance.jbintern.structure.FedProcessor;
+import ru.covariance.processorScheduler.Processor;
+import ru.covariance.processorScheduler.ProcessorException;
+import ru.covariance.processorScheduler.queue.TaskQueue;
+import ru.covariance.processorScheduler.structure.FedProcessor;
 
 import java.util.*;
 import java.util.concurrent.locks.Condition;

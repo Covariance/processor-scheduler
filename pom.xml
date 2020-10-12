@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.covariance</groupId>
-    <artifactId>processors-scheduling</artifactId>
+    <artifactId>processor-scheduler</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 

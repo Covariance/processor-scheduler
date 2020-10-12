@@ -1,6 +1,6 @@
-package ru.covariance.jbintern.queue.confident;
+package ru.covariance.processorScheduler.queue.confident;
 
-import ru.covariance.jbintern.structure.FedProcessor;
+import ru.covariance.processorScheduler.structure.FedProcessor;
 
 import java.util.List;
 

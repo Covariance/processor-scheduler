@@ -1,4 +1,4 @@
-# Processors scheduler
+# Processor scheduler
 ## Условия:
 Требуется написать реализацию интерфейса `Runner`, удовлетворяющую контракту интерфейса:
 
@@ -60,7 +60,7 @@ public interface Runner<T> {
 `TaskQueue`, а для передачи его в исполнителя — интерфейс `TaskQueueCreator`. Мной
 было придумано две различных очереди заданий:
 
-#### [Confident task queue](src/main/java/ru/covariance/jbintern/queue/confident)
+#### [Confident task queue](src/main/java/ru/covariance/processorScheduler/queue/confident)
 Все процессоры добавляются в очередь сразу же, как только их становится можно
 запустить:
 - При инициализации очереди, если этот процесс является источником данных;
@@ -76,7 +76,7 @@ public interface Runner<T> {
  * Если какой-то процессор возвращает `null` или исключение, то может оказаться,
  что мы выполнили слишком много лишней работы.
  
-#### [Iterative task queue](src/main/java/ru/covariance/jbintern/queue/iterative)
+#### [Iterative task queue](src/main/java/ru/covariance/processorScheduler/queue/iterative)
 Итерации выполняются последовательно — следующая итерация не начинает выполняться,
 пока не закончились все операции предыдущей. 
 
@@ -115,7 +115,7 @@ public interface Runner<T> {
  то они могут простаивать существенное время, дожидаясь, пока им выдадут новую задачу. Этот недостаток
  становится особенно существенным при большом количестве тредов.
  
-#### [Anarchist policy](src/main/java/ru/covariance/jbintern/policies/anarchist)
+#### [Anarchist policy](src/main/java/ru/covariance/processorScheduler/policies/anarchist)
 Существует тред, стартующий остальные и подводящий итоги, в остальном треды равноправны,
 также существует единый объект, распределяющий задачи. По окончании
 своей задачи каждый тред пытается захватить объект и получить новую задачу для себя,

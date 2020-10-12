@@ -1,12 +1,10 @@
-package ru.covariance.jbintern.policies.anarchist;
+package ru.covariance.processorScheduler.policies.anarchist;
 
-import ru.covariance.jbintern.Processor;
-import ru.covariance.jbintern.Runner;
-import ru.covariance.jbintern.queue.TaskQueueCreator;
-import ru.covariance.jbintern.queue.confident.ProcessorGraph;
-import ru.covariance.jbintern.queue.confident.ConfidentTaskQueue;
-import ru.covariance.jbintern.queue.TaskQueue;
-import ru.covariance.jbintern.ProcessorException;
+import ru.covariance.processorScheduler.Processor;
+import ru.covariance.processorScheduler.Runner;
+import ru.covariance.processorScheduler.queue.TaskQueueCreator;
+import ru.covariance.processorScheduler.queue.TaskQueue;
+import ru.covariance.processorScheduler.ProcessorException;
 
 import java.util.List;
 import java.util.Map;

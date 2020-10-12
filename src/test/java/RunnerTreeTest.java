@@ -3,7 +3,7 @@ import generators.TreeGenerator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import ru.covariance.jbintern.Processor;
+import ru.covariance.processorScheduler.Processor;
 
 import java.util.List;
 import java.util.Random;

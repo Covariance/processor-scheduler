@@ -1,8 +1,8 @@
-package ru.covariance.jbintern.policies.anarchist;
+package ru.covariance.processorScheduler.policies.anarchist;
 
-import ru.covariance.jbintern.structure.FedProcessor;
-import ru.covariance.jbintern.queue.TaskQueue;
-import ru.covariance.jbintern.ProcessorException;
+import ru.covariance.processorScheduler.structure.FedProcessor;
+import ru.covariance.processorScheduler.queue.TaskQueue;
+import ru.covariance.processorScheduler.ProcessorException;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;

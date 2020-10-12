@@ -1,9 +1,9 @@
-package ru.covariance.jbintern.queue.confident;
+package ru.covariance.processorScheduler.queue.confident;
 
-import ru.covariance.jbintern.Processor;
-import ru.covariance.jbintern.ProcessorException;
-import ru.covariance.jbintern.structure.FedProcessor;
-import ru.covariance.jbintern.structure.UnfedProcessor;
+import ru.covariance.processorScheduler.Processor;
+import ru.covariance.processorScheduler.ProcessorException;
+import ru.covariance.processorScheduler.structure.FedProcessor;
+import ru.covariance.processorScheduler.structure.UnfedProcessor;
 
 import java.util.*;
 import java.util.stream.Collectors;

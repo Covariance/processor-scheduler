@@ -1,7 +1,7 @@
 import org.junit.Assert;
-import ru.covariance.jbintern.Processor;
-import ru.covariance.jbintern.ProcessorException;
-import ru.covariance.jbintern.Runner;
+import ru.covariance.processorScheduler.Processor;
+import ru.covariance.processorScheduler.ProcessorException;
+import ru.covariance.processorScheduler.Runner;
 
 import java.util.List;
 import java.util.Map;

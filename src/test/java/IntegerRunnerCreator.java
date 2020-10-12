@@ -1,7 +1,7 @@
-import ru.covariance.jbintern.Runner;
-import ru.covariance.jbintern.policies.anarchist.AnarchistRunner;
-import ru.covariance.jbintern.queue.confident.ConfidentTaskQueue;
-import ru.covariance.jbintern.queue.iterative.IterativeTaskQueue;
+import ru.covariance.processorScheduler.Runner;
+import ru.covariance.processorScheduler.policies.anarchist.AnarchistRunner;
+import ru.covariance.processorScheduler.queue.confident.ConfidentTaskQueue;
+import ru.covariance.processorScheduler.queue.iterative.IterativeTaskQueue;
 
 import java.util.List;
 

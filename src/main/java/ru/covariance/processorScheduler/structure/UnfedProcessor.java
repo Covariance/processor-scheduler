@@ -1,6 +1,6 @@
-package ru.covariance.jbintern.structure;
+package ru.covariance.processorScheduler.structure;
 
-import ru.covariance.jbintern.ProcessorException;
+import ru.covariance.processorScheduler.ProcessorException;
 
 import java.util.List;
 

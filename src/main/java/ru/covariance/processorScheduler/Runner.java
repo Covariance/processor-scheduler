@@ -1,4 +1,4 @@
-package ru.covariance.jbintern;
+package ru.covariance.processorScheduler;
 
 import java.util.List;
 import java.util.Map;

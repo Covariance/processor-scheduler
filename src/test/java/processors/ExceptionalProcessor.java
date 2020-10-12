@@ -1,6 +1,6 @@
 package processors;
 
-import ru.covariance.jbintern.ProcessorException;
+import ru.covariance.processorScheduler.ProcessorException;
 
 import java.util.List;
 

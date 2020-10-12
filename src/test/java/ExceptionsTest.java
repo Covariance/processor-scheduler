@@ -3,7 +3,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import processors.ExceptionalProcessor;
 import processors.SleepingProcessor;
-import ru.covariance.jbintern.ProcessorException;
+import ru.covariance.processorScheduler.ProcessorException;
 
 import java.util.HashSet;
 import java.util.List;
