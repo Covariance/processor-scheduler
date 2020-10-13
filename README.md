@@ -1,6 +1,6 @@
 # Processor scheduler
-## Условия:
-Требуется написать реализацию интерфейса `Runner`, удовлетворяющую контракту интерфейса:
+## Goal
+Implement the `Runner` interface satisfying the following contract:
 
 ```java
 public interface Runner<T> {
@@ -16,139 +16,129 @@ public interface Runner<T> {
     Map<String, List<T>> runProcessors(Set<Processor<T>> processors, int maxThreads, int maxIterations) throws ProcessorException;
 }
 ```
+`Processor` interface is specified as following:
 
-Реализация должна удовлетворять следующим требованиям:
-- Задача метода `runProcessors` – запускать весь набор «процессоров» в несколько итераций (не более `maxIterations`)
- и возвратить список результатов каждого для всех полных итераций;
-- В рамках каждой итерации ни один «процессор» не запускается пока не будут
- запущены все те, что соответствуют его `input ids`;
-- Некоторые «процессоры» возвращают пустые списки `input ids`,
- они являются источником данных и могут запускаться сразу;
-- «Процессоры» могут (и должны) выполняться в несколько потоков, но не более чем `maxThreads`;
-- В каждой итерации каждый «процессор» запускается ровно один раз;
-- Может запускаться больше одной итерации одновременно, но ни один «процессор»
- не может запускаться параллельно самому себе;
-- Последовательность итераций для каждого «процессора» должна соблюдаться, то есть он не может
- быть запущен в итерации, если еще не завершился в предыдущей;
-- Если хоть один «процессор» кидает исключение, все остальные потоки должны прерываться
- и `runProcessors` тоже должен кидать исключение;
-- Также `runProcessors` должен кидать исключение, если граф зависимостей содержит циклы или неизвестные `input ids`
-- Если хоть один «процессор» возвращает `null`, результаты этой и всех последующих (если они уже запущены)
- итераций должны игнорироваться и `runProcessors` должен возвращать результат всех предыдущих итераций;
+```java
+public interface Processor<T> {
+    /**
+     * @return processor id, immutable, unique among all instances, not null
+     */
+    String getId();
 
-## Теоретическая часть
+    /**
+     * @return a list of processors that have to be executed before this one
+     * and whose results must be passed to Processor::process,
+     * immutable, can be null or empty, both means no inputs
+     */
+    List<String> getInputIds();
 
-Реализацию вышеуказанного задания можно разбить на три основных части:
+    /**
+     * @param input outputs of the processors whose ids are returned by Processor::getInputIds, not null, but can be empty
+     * @return output of the processing, null if no output is produced
+     * @throws ProcessorException if error occurs during processing
+     */
+    T process(List<T> input) throws ProcessorException;
+}
+```
+Following restrictions and rules must be followed:
+- Task of `runProcessors` method is to run all set of processors in several iterations (not more than `maxIterations`) and return list of results of all iterations for each processor;
+- During one iteration no processor can be run before all of its input processors on this iteration are finished;
+- Processors that return empty input id lists are considered data sources and can be run ;
+- Processors can be run using several threads, though not more than `maxThreads`;
+- On each iteration ech processor can be run no more than once;
+- More than one iteration can be run at a time, though sequence of iterations for each individual processor must be satisfied, which means that processor must be finished in a previous iteration to be run in the next one;
+- If any processor throws an exception, all other threads must finish their work and `runProcessors` must also throw an exception;
+- Also `runProcessors` must throw an exception if dependency graph has cycles or contains unknown input ids;
+- If any processor returns `null`, results of that and all of the next iterations must be ignored, and `runProcessors` must return results of all previous iterations.
 
-### Препроцессинг
-Этап препроцессинга переводит `Set<Processor<T>>` в более удобное для дальнейшего использования
-представление, а также проверяет граф зависимостей процессоров на ацикличность и
-отсутствие неизвестных зависимостей.
+## Theory
+Following implementation can be divided in three stages:
 
-#### Ацикличность
+### Preprocessing
+Preprocessing stage translates `Set<Processor<T>>` into more convinient form and checks if dependency graph has cycles or uknown input ids. 
 
-Граф зависимосте проверяется на ацикличность при помощи одного обхода в глубину.
-Изначально все вершины покрашены в чёрный. Когда мы входим в вершину, мы красим
-её в серый, когда выходим из вершины, красим в белый, в белые вершины мы больше
-не входим. Если в какой-то момент мы должны войти в серую вершину, то мы нашли
-цикл, так как от этой вершины существует путь в саму себя.
+#### Acyclic
+Dependency graph can be cycle-checked using single DFS. All vertices are painted *black*,
+when DFS enters the vertice, in paints it *gray*, and when it leaves vertice, it paints it *white*.
+If DFS enters *gray* vertice, than graph has cycles, because there exists path from that vertice to itself.
 
-### Формирование планировщика
-Планировщик, или *очередь задач*, будет тем объектом/процессом, который раздаёт 
-задачи исполнителям, сохраняет результаты их выполнения и следит за исключениями и
-`null`-ответами. Для описания контрактов планировщика мной был создан интерфейс
-`TaskQueue`, а для передачи его в исполнителя — интерфейс `TaskQueueCreator`. Мной
-было придумано две различных очереди заданий:
+### Scheduler creation
+Scheduler, or *task queue*, will be the object/process, that gives task to executors,
+saves their results, monitors the exceptions and `null` results. To describe scheduler
+contracts I developed `TaskQueue` interface, and in order to pass it to the executor I 
+created `TaskQueueCreator` interface. I have designed two different task queues:
 
 #### [Confident task queue](src/main/java/ru/covariance/processorScheduler/queue/confident)
-Все процессоры добавляются в очередь сразу же, как только их становится можно
-запустить:
-- При инициализации очереди, если этот процесс является источником данных;
-- При завершении исполнения этого процессора в предыдущей итерации, так как
-процессор не может выполнятся парралельно сам себе;
-- При завершении исполнения всех процессоров этой эпохи, которые предоставляют 
-входные данные для этого.
+All processors are added to the task queue as soon as we're able to launch them:
+- During queue initialization, if this processor is data source;
+- After processor finishes its execution during previous iteration;
+- After all input processors for this one during this iteration finish.
 
-##### Преимущества:
- * Очередь всегда по максимуму заполнена, простои могут случится только если
- порядок исполнения неоптимален.
-##### Недостатки:
- * Если какой-то процессор возвращает `null` или исключение, то может оказаться,
- что мы выполнили слишком много лишней работы.
+##### Pros:
+ * Queue is always filled to its extent, and idles can occur only through unoptimal execution order.
+##### Cons:
+ * If some processor throws exception or returns null, we may have done too much redundant work.
  
 #### [Iterative task queue](src/main/java/ru/covariance/processorScheduler/queue/iterative)
-Итерации выполняются последовательно — следующая итерация не начинает выполняться,
-пока не закончились все операции предыдущей. 
+Iterations are processed sequentially, one at a time. Processors are added
+to the queue only if:
+- They are data sources and previous iteration have finished, or this iteration is first;
+- After all input processors for this one during this iteration finish.
 
-##### Преимущества
- * Объем лишней работы при возврате `null` одним из процессоров минимален.
+##### Pros:
+ * Redundant work is minimized in case of `null` result or exception.
 
-##### Недостатки
- * Не гарантируется постоянное заполнение очереди. Если у графа процессоров есть
- *бутылочное горлышко*, то простои могут быть очень существенными.
-
-### Выполнение процессов
-Для выполнения процессов мной были придуманы три различные политики, эффективность
-которых на различных входных данных существенно различается.
+##### Cons:
+ * It's not guaranteed that queue is always filled to its extent, and some executors may wait for tasks. 
+ If there's a *bottleneck* in dependency graph, idle time can be very big.
+ 
+### Execution of processors
+For processors execution I have designed three different policies, which efficiency differ drastically on
+different input data.
 
 #### Boss policy
-Существует главный тред, который выдаёт всем остальным тредам задачи. Сам он выполняет задачи
-только если других доступных тредов нет.
+One main thread distribute stasks between all others, possibly changing some internal priorities of executors
+and tasks.
 
-##### Преимущества:
- * Если доступных тредов много, эта политика будет весьма эффективна, так как все потоки
- будут загружены практически всё время.
-##### Недостатки:
- * Если доступных тредов мало, то тред-босс будет простаивать существенную часть времени.
- * Требуется писать отдельную реализцию на случай, если доступных тредов нет, так как тогда
- треду-боссу придётся выполнять все задачи самому.
+##### Pros:
+ * If there're a lot of available threads, this policy will be very efficient, because it can use more advanced algorithm
+ to distribute tasks and therefore speed up overall execution.
+##### Cons:
+ * If there're not so many threads available, this policy will be very unefficient, because it will take a lot of
+overall executor time to distribute tasks;
+ * Special implementation must be coded for the case of only one thread.
 
 #### Leader policy
-Существует главный тред, который, распределив задачи между остальными тредами,
- берёт задачу и себе и не раздаёт новых задач, пока не выполнит её.
+One main thread distributes tasks between others and then takes the task for itself, repeating this algorithm upon
+its completion.
 
-##### Преимущества:
- * Тред-лидер никогда не простаивает, что может быть очень выгодно при малом количестве 
- доступных тредов. Для любого количества тредов код остаётся одинаковым.
-##### Недостатки:
- * Так как остальным тредам приходится дожидаться того, как основной тред закончит свою задачу,
- то они могут простаивать существенное время, дожидаясь, пока им выдадут новую задачу. Этот недостаток
- становится особенно существенным при большом количестве тредов.
+##### Pros:
+ * Leader thread is not idle at any time, executing processors as well as the others.
+##### Cons:
+ * Other threads must wait for leader's completion of its processor, possibly creating a lot of idles.
  
 #### [Anarchist policy](src/main/java/ru/covariance/processorScheduler/policies/anarchist)
-Существует тред, стартующий остальные и подводящий итоги, в остальном треды равноправны,
-также существует единый объект, распределяющий задачи. По окончании
-своей задачи каждый тред пытается захватить объект и получить новую задачу для себя,
-иначе ждёт, пока задача не появится.
+One of the threads starts all others and submits the results, but overall threads are equal, taking tasks from
+sycnhronized queue object.
 
-##### Преимущества:
- * Треды простаивают только если новых задач попросту пока что нет или в очереди за
- распределителем задач. 
- * Не выделяется отдельный главный тред, от перфоманса которого зависят все остальные.
-##### Недостатки:
- * При большом количестве тредов и простых(быстрых) задачах эффективность заметно снижается,
- так как бОльшая часть времени тратится на стояние в очереди за распределителем.
-##### Возможные улучшения:
- * Единственное время простоя это время ожидания захвата очереди.
- При большом количестве потоков это становится крайне существенно.
- Возможные улучшения этого момента:
-    - Вдохновляясь протоколами когеррентности кэшей, можно сделать
-    несколько экземпляров объекта очереди, которые будет синхронизироваться
-    между собой, когда никто не пытается их захватить.
-    - Можно делить граф процессоров на несколько частей, которые
-    слабо зависят друг от друга и каждому назначать свой экземпляр
-    очереди.
- * Может оказаться, что порядок исполнения внутри самой очереди
-  неоптимален, и из-за этого у нас возникают искуственные
-  *бутылочные горлышки*. Вдохновляясь идеями, лежащими в основе альтернативы конвейрного
-  исполнения - суперскалярной архитектуры, можно оптимизировать очередь,
-  запоминая информацию о предыдущих итерациях. 
-## Практическая часть
-Были реализованы обе вышеописанные очереди задач (названия кликабельны).
-Из политик поведения была реализована только анархистская.
+##### Pros:
+ * Threads are idle if and only if there're no new tasks in queue; 
+ * There's no main executor, which perfomance impacts overall runner perfomance.
+##### Cons:
+ * If there're a lot of simple tasks and many available threads, it can become much less effective, because most of the time 
+ executors would just wait to synchronize on task queue.
+##### Possible upgrades:
+ * The only idle time of this runner is the time when executors queue to synchronize on queue. We can decrease this time
+    by implementing some of these ideas:
+    - Inspired by cache coherency protocols, we can do several instances of queue, that are synchronizing between each other.
+    - We can split processor graph in several independent parts and process each one on its own.
+ * It can happen that inner task queue ordering is unoptimal, and artificial *bottlenecks* appear. Inspired by *superscalar*
+    architecture of conveyor executing we can somehow optimize inner task ordering based on results and perfomance of previous iterations.
+    
+## Implementation and testing
+All beforementioned task queues implementes (labels are clickable).
+Anarchist policy implemented.
 
-Также реализовано достаточно большое количество различных тестов.
-Подробнее о них [тут](src/test/java/README.md).
+A lot of testing done. You can read about them [here](src/test/java/README.md).
 
-Запускаются тесты при помощи `maven-surefire-plugin` командой 
-`mvn test`.
+Tests are launched using `maven-surefire-plugin` with a `mvn test` command.
